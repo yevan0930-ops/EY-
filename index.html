@@ -54,7 +54,7 @@ const originalCardsForSpeed=window.cards;window.cards=function(){originalCardsFo
 window.speak=function(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(words[index].w);u.lang='en-US';u.rate=voiceSpeed;let voices=speechSynthesis.getVoices();u.voice=voices.find(v=>/^en-US/i.test(v.lang)&&/google us english/i.test(v.name))||voices.find(v=>/^en-US/i.test(v.lang)&&/(female|zira|jenny|aria|samantha|ava)/i.test(v.name))||voices.find(v=>/^en-US/i.test(v.lang))||null;speechSynthesis.speak(u)};
 window.cards();
 </script><script>
-let voiceGender='female';
+let voiceGender='male';
 function updateGenderButton(){let button=document.querySelector('#genderButton');if(button)button.textContent=voiceGender==='female'?'👩 女聲':'👨 男聲'}
 function cycleVoiceGender(){voiceGender=voiceGender==='female'?'male':'female';updateGenderButton()}
 function addGenderButton(){let actions=document.querySelector('#cardsView .actions');if(!actions)return;let button=document.createElement('button');button.className='btn soft';button.id='genderButton';button.setAttribute('aria-label','切換男女聲');button.addEventListener('click',cycleVoiceGender);let speed=document.querySelector('#speedButton');actions.insertBefore(button,speed?.nextSibling||null);updateGenderButton()}
