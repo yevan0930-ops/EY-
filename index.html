@@ -134,6 +134,33 @@ window.speak=function(){speechSynthesis.cancel();let u=new SpeechSynthesisUttera
   renderVoicePicker();
   window.cards();
 })();
+</script><script>
+window.currentAnswerCorrect=null;
+window.answer=function(el,correct){
+  if(answered)return;
+  answered=true;
+  const yes=el.dataset.word===correct;
+  window.currentAnswerCorrect=yes;
+  document.querySelectorAll('.answer').forEach(b=>{if(b.dataset.word===correct)b.classList.add('correct')});
+  const nextButton=document.querySelector('#quizView .quiz-actions button');
+  if(yes){
+    score++;$('#feedback').textContent='答對了！做得好 🎉';
+    learned.add(correct);save();
+    if(nextButton)nextButton.textContent='下一題 →';
+  }else{
+    el.classList.add('wrong');
+    $('#feedback').textContent='答錯了！伏地挺身 10 下 💪 再試一次這個單字。';
+    if(nextButton)nextButton.textContent='重新測驗此題 ↻';
+  }
+  const count=document.querySelector('#quizView .count');
+  if(count)count.textContent='得分 '+score;
+};
+window.nextQuestion=function(){
+  if(window.currentAnswerCorrect===false){quiz();return}
+  window.currentAnswerCorrect=null;
+  quizQuestionPosition++;
+  quiz();
+};
 </script></body></html>
 
 
