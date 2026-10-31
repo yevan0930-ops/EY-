@@ -203,7 +203,7 @@ window.nextQuestion=function(){
     {w:'adapt',p:'/əˈdæpt/ · verb',m:'適應；調整',e:'Animals <b>adapt</b> to changes in their environment.',t:'動物會適應環境的變化。'},
     {w:'benefit',p:'/ˈben.ə.fɪt/ · noun / verb',m:'好處；使受益',e:'Exercise can <b>benefit</b> both your body and mind.',t:'運動對身心都有好處。'},
     {w:'conclude',p:'/kənˈkluːd/ · verb',m:'推論；結束',e:'We can <b>conclude</b> that plants need sunlight.',t:'我們可以推論植物需要陽光。'},
-    {w:'consequence',p:'/ˈkɑːn.sə.kwენს/ · noun',m:'結果；後果',e:'One <b>consequence</b> of the storm was a power outage.',t:'暴風雨造成的其中一個後果是停電。'},
+    {w:'consequence',p:'/ˈkɑːn.sə.kwens/ · noun',m:'結果；後果',e:'One <b>consequence</b> of the storm was a power outage.',t:'暴風雨造成的其中一個後果是停電。'},
     {w:'create',p:'/kriˈeɪt/ · verb',m:'創造；製作',e:'The class will <b>create</b> a model of the solar system.',t:'全班要製作一個太陽系模型。'},
     {w:'discover',p:'/dɪˈskʌv.ɚ/ · verb',m:'發現',e:'Scientists <b>discover</b> new things by asking questions.',t:'科學家藉由提問來發現新事物。'},
     {w:'effect',p:'/ɪˈfekt/ · noun',m:'影響；效果',e:'The medicine had a helpful <b>effect</b>.',t:'這種藥產生了有幫助的效果。'},
@@ -243,6 +243,8 @@ window.nextQuestion=function(){
     old.replaceWith(button);
     button.addEventListener('click',replaceWordSet);
   }
+  const renderCards=window.cards;
+  window.cards=function(){renderCards();installButton()};
   installButton();
 })();
 </script></body></html>
