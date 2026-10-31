@@ -69,6 +69,71 @@ window.nextQuestion=function(){quizQuestionPosition++;quiz()};
 window.restartQuizRound=function(){startQuizRound();quiz()};
 </script><script>
 window.speak=function(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(words[index].w);u.lang='en-US';u.rate=voiceSpeed;u.pitch=voiceGender==='male'?.82:1;let english=speechSynthesis.getVoices().filter(v=>/^en-US/i.test(v.lang));let female=english.find(v=>/google us english/i.test(v.name))||english.find(v=>/(female|zira|jenny|aria|samantha|ava|victoria|karen|susan)/i.test(v.name));let male=english.find(v=>/(?:^|\W)male\b|david|guy|mark|eric|christopher|alex|daniel|james|thomas|aaron|ryan/i.test(v.name))||english.find(v=>!/(google us english|female|zira|jenny|aria|samantha|ava|victoria|karen|susan)/i.test(v.name));u.voice=voiceGender==='female'?(female||english[0]||null):(male||english[0]||null);speechSynthesis.speak(u)};
+</script><script>
+(function(){
+  const malePattern=/(?:^|\\W)(?:male|david|guy|mark|eric|christopher|daniel|james|thomas|aaron|ryan|andrew|brian|matthew|oliver|george|jason|tony|kevin|richard|roger|fred|jorge|diego|pablo|juan|carlos)(?:$|\\W)/i;
+  const femalePattern=/(?:^|\\W)(?:female|zira|jenny|aria|samantha|ava|victoria|karen|susan|sara|michelle|libby|natasha|sophie|olivia|emma|amy|helen|hazel|catherine|monica|ana|lucia)(?:$|\\W)/i;
+  let chosenVoice=null;
+  function classify(v){
+    const n=v.name||'';
+    if(femalePattern.test(n)) return 'female';
+    if(malePattern.test(n)) return 'male';
+    return 'unknown';
+  }
+  function renderVoicePicker(){
+    const actions=document.querySelector('#cardsView .actions');
+    if(!actions) return;
+    let picker=document.querySelector('#voicePicker');
+    if(!picker){
+      document.querySelector('#genderButton')?.remove();
+      picker=document.createElement('select'); picker.id='voicePicker'; picker.className='btn soft';
+      picker.setAttribute('aria-label','選擇英文發音聲音');
+      picker.style.maxWidth='230px';
+      const speed=document.querySelector('#speedButton');
+      actions.insertBefore(picker,speed?.nextSibling||null);
+      picker.addEventListener('change',()=>{
+        const voices=speechSynthesis.getVoices();
+        chosenVoice=voices.find(v=>v.voiceURI===picker.value)||null;
+        if(chosenVoice) localStorage.setItem('wq-selected-voice',chosenVoice.voiceURI);
+      });
+    }
+    const voices=speechSynthesis.getVoices().filter(v=>/^en(-|_)/i.test(v.lang));
+    const groups={male:[],female:[],unknown:[]};
+    voices.forEach(v=>groups[classify(v)].push(v));
+    const saved=localStorage.getItem('wq-selected-voice');
+    const preferred=groups.male.find(v=>v.voiceURI===saved)||groups.male[0];
+    picker.innerHTML='';
+    [['male','👨 男聲'],['female','👩 女聲'],['unknown','其他英文聲音']].forEach(([gender,label])=>{
+      const group=document.createElement('optgroup');group.label=label;
+      if(!groups[gender].length){
+        const option=document.createElement('option');option.textContent=gender==='male'?'此裝置未提供可辨識男聲':gender==='female'?'此裝置未提供可辨識女聲':'沒有其他英文聲音';
+        option.disabled=true;group.appendChild(option);
+      }else groups[gender].forEach(v=>{
+        const option=document.createElement('option');option.value=v.voiceURI;option.textContent=v.name+' ('+v.lang+')';group.appendChild(option);
+      });
+      picker.appendChild(group);
+    });
+    if(preferred){picker.value=preferred.voiceURI;chosenVoice=preferred;localStorage.setItem('wq-selected-voice',preferred.voiceURI);}
+    else if(saved&&voices.some(v=>v.voiceURI===saved)){picker.value=saved;chosenVoice=voices.find(v=>v.voiceURI===saved);}
+    else {chosenVoice=null;}
+  }
+  window.speak=function(){
+    speechSynthesis.cancel();
+    renderVoicePicker();
+    const picker=document.querySelector('#voicePicker');
+    const voices=speechSynthesis.getVoices();
+    const voice=voices.find(v=>v.voiceURI===picker?.value)||chosenVoice;
+    if(!voice){toast('目前裝置沒有可用的英文聲音，請檢查瀏覽器語音設定。');return;}
+    const u=new SpeechSynthesisUtterance(words[index].w);
+    u.lang=voice.lang;u.voice=voice;u.rate=voiceSpeed;
+    speechSynthesis.speak(u);
+  };
+  speechSynthesis.addEventListener('voiceschanged',renderVoicePicker);
+  const oldCards=window.cards;
+  window.cards=function(){oldCards();renderVoicePicker()};
+  renderVoicePicker();
+  window.cards();
+})();
 </script></body></html>
 
 
