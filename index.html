@@ -44,6 +44,14 @@ function speak(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(wor
 </script><script>
 function updateGoal(){let amount=Math.min(learned.size,10);$('#goalText').textContent=`${amount} / 10`;$('#fill').style.width=`${amount*10}%`}
 document.querySelector('.goal .tiny').textContent='每天認識 10 個單字！';updateGoal();
+</script><script>
+let voiceSpeed=.85;
+function updateSpeedButton(){let button=document.querySelector('#speedButton');if(button)button.textContent=`⏱ 速度：${voiceSpeed===.65?'慢速':voiceSpeed===.85?'正常':'快速'}`}
+function cycleVoiceSpeed(){voiceSpeed=voiceSpeed===.65?.85:voiceSpeed===.85?1.05:.65;updateSpeedButton()}
+function addSpeedButton(){let actions=document.querySelector('#cardsView .actions');if(!actions)return;let button=document.createElement('button');button.className='btn soft';button.id='speedButton';button.setAttribute('aria-label','改變發音速度');button.addEventListener('click',cycleVoiceSpeed);actions.insertBefore(button,actions.children[1]||null);updateSpeedButton()}
+const originalCardsForSpeed=window.cards;window.cards=function(){originalCardsForSpeed();addSpeedButton()};
+window.speak=function(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(words[index].w);u.lang='en-US';u.rate=voiceSpeed;let voices=speechSynthesis.getVoices();u.voice=voices.find(v=>/^en-US/i.test(v.lang)&&/google us english/i.test(v.name))||voices.find(v=>/^en-US/i.test(v.lang)&&/(female|zira|jenny|aria|samantha|ava)/i.test(v.name))||voices.find(v=>/^en-US/i.test(v.lang))||null;speechSynthesis.speak(u)};
+window.cards();
 </script></body></html>
 
 
