@@ -61,6 +61,12 @@ function addGenderButton(){let actions=document.querySelector('#cardsView .actio
 const originalCardsForGender=window.cards;window.cards=function(){originalCardsForGender();addGenderButton()};
 window.speak=function(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(words[index].w);u.lang='en-US';u.rate=voiceSpeed;let english=speechSynthesis.getVoices().filter(v=>/^en-US/i.test(v.lang));let female=english.find(v=>/google us english/i.test(v.name))||english.find(v=>/(female|zira|jenny|aria|samantha|ava|victoria|karen|susan)/i.test(v.name));let male=english.find(v=>/(?:^|\W)male\b|david|guy|mark|eric|christopher|alex|daniel|james|thomas|aaron|ryan/i.test(v.name))||english.find(v=>!/(google us english|female|zira|jenny|aria|samantha|ava|victoria|karen|susan)/i.test(v.name));u.voice=voiceGender==='female'?(female||english[0]||null):(male||english[0]||null);speechSynthesis.speak(u)};
 window.cards();
+</script><script>
+let quizQuestionOrder=[],quizQuestionPosition=0;
+function startQuizRound(){quizQuestionOrder=words.map((_,i)=>i).sort(()=>Math.random()-.5);quizQuestionPosition=0;score=0}
+window.quiz=function(){if(!quizQuestionOrder.length)startQuizRound();if(quizQuestionPosition>=quizQuestionOrder.length){$('#quizView').innerHTML=`<div class="section-head"><h2>本輪完成！</h2><span class="count">得分 ${score} / ${words.length}</span></div><div class="empty"><div style="font-size:48px">🎉</div><h3>你完成了這一輪小測驗！</h3><p>每個單字都只出現一次。</p><button class="btn primary" onclick="restartQuizRound()">再玩一輪 →</button></div>`;return}let q=words[quizQuestionOrder[quizQuestionPosition]],opts=[q,...words.filter(x=>x.w!==q.w).sort(()=>Math.random()-.5).slice(0,3)].sort(()=>Math.random()-.5);answered=false;$('#quizView').innerHTML=`<div class="section-head"><h2>小測驗</h2><span class="count">得分 ${score}</span></div><div class="quizbox"><div class="question-label">選出最接近的中文意思</div><div class="qword">${q.w}</div><div class="answers">${opts.map(o=>`<button class="answer" data-word="${o.w}" onclick="answer(this,'${q.w}')">${o.m}</button>`).join('')}</div><div class="feedback" id="feedback">選一個答案試試看！</div><div class="quiz-actions"><span class="tiny">第 ${quizQuestionPosition+1} 題 / ${words.length} 題</span><button class="btn primary" onclick="nextQuestion()">跳過 →</button></div></div>`};
+window.nextQuestion=function(){quizQuestionPosition++;quiz()};
+window.restartQuizRound=function(){startQuizRound();quiz()};
 </script></body></html>
 
 
