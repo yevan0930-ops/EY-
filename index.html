@@ -161,6 +161,42 @@ window.nextQuestion=function(){
   quizQuestionPosition++;
   quiz();
 };
+</script><script>
+(function(){
+  let cardDeck=words.map((_,i)=>i);
+  let cardPosition=cardDeck.indexOf(index);
+  if(cardPosition<0)cardPosition=0;
+  function addRefreshButton(){
+    const head=document.querySelector('#cardsView .section-head');
+    if(!head||document.querySelector('#refreshDeckButton'))return;
+    const btn=document.createElement('button');
+    btn.id='refreshDeckButton';btn.className='btn soft';
+    btn.textContent='🔄 刷新題組';
+    btn.setAttribute('aria-label','重新隨機排列單字卡');
+    btn.style.padding='9px 12px';btn.style.fontSize='13px';btn.style.whiteSpace='nowrap';
+    head.insertBefore(btn,head.querySelector('h2'));
+    btn.addEventListener('click',refreshDeck);
+    const style=document.createElement('style');
+    style.textContent='#cardsView .section-head{justify-content:flex-start;gap:10px}#cardsView .section-head .count{margin-left:auto}';
+    document.head.appendChild(style);
+  }
+  function drawCard(){
+    index=cardDeck[cardPosition];
+    window.cards();
+    addRefreshButton();
+  }
+  function refreshDeck(){
+    const previous=cardDeck.join(',');
+    do{cardDeck=words.map((_,i)=>i).sort(()=>Math.random()-.5)}while(cardDeck.join(',')===previous&&cardDeck.length>1);
+    cardPosition=0;
+    drawCard();
+  }
+  window.refreshCardDeck=refreshDeck;
+  window.nextCard=function(){cardPosition=(cardPosition+1)%cardDeck.length;drawCard()};
+  const render=window.cards;
+  window.cards=function(){render();addRefreshButton()};
+  window.cards();
+})();
 </script></body></html>
 
 
