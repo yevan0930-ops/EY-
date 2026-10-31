@@ -46,6 +46,7 @@ function updateGoal(){let amount=Math.min(learned.size,10);$('#goalText').textCo
 document.querySelector('.goal .tiny').textContent='每天認識 10 個單字！';updateGoal();
 </script><script>
 let voiceSpeed=.85;
+let speedStyles=document.createElement('style');speedStyles.textContent='@media(max-width:700px){.actions{flex-wrap:wrap}.actions .btn{flex:1 1 auto}}';document.head.appendChild(speedStyles);
 function updateSpeedButton(){let button=document.querySelector('#speedButton');if(button)button.textContent=`⏱ 速度：${voiceSpeed===.65?'慢速':voiceSpeed===.85?'正常':'快速'}`}
 function cycleVoiceSpeed(){voiceSpeed=voiceSpeed===.65?.85:voiceSpeed===.85?1.05:.65;updateSpeedButton()}
 function addSpeedButton(){let actions=document.querySelector('#cardsView .actions');if(!actions)return;let button=document.createElement('button');button.className='btn soft';button.id='speedButton';button.setAttribute('aria-label','改變發音速度');button.addEventListener('click',cycleVoiceSpeed);actions.insertBefore(button,actions.children[1]||null);updateSpeedButton()}
