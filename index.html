@@ -41,6 +41,9 @@ function wordList(){$('#wordsView').innerHTML=`<div class="section-head"><h2>單
 document.querySelectorAll('.nav button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));b.classList.add('active');['cards','quiz','words'].forEach(v=>$('#'+v+'View').classList.toggle('hidden',v!==b.dataset.view));if(b.dataset.view==='quiz')quiz();if(b.dataset.view==='words')wordList()}));updateGoal();cards();
 </script><script>
 function speak(){speechSynthesis.cancel();let u=new SpeechSynthesisUtterance(words[index].w);u.lang='en-US';u.rate=.85;let voices=speechSynthesis.getVoices();u.voice=voices.find(v=>/^en-US/i.test(v.lang)&&/google us english/i.test(v.name))||voices.find(v=>/^en-US/i.test(v.lang)&&/(female|zira|jenny|aria|samantha|ava)/i.test(v.name))||voices.find(v=>/^en-US/i.test(v.lang))||null;speechSynthesis.speak(u)}
+</script><script>
+function updateGoal(){let amount=Math.min(learned.size,10);$('#goalText').textContent=`${amount} / 10`;$('#fill').style.width=`${amount*10}%`}
+document.querySelector('.goal .tiny').textContent='每天認識 10 個單字！';updateGoal();
 </script></body></html>
 
 
