@@ -197,6 +197,54 @@ window.nextQuestion=function(){
   window.cards=function(){render();addRefreshButton()};
   window.cards();
 })();
+</script><script>
+(function(){
+  const freshWords=[
+    {w:'adapt',p:'/əˈdæpt/ · verb',m:'適應；調整',e:'Animals <b>adapt</b> to changes in their environment.',t:'動物會適應環境的變化。'},
+    {w:'benefit',p:'/ˈben.ə.fɪt/ · noun / verb',m:'好處；使受益',e:'Exercise can <b>benefit</b> both your body and mind.',t:'運動對身心都有好處。'},
+    {w:'conclude',p:'/kənˈkluːd/ · verb',m:'推論；結束',e:'We can <b>conclude</b> that plants need sunlight.',t:'我們可以推論植物需要陽光。'},
+    {w:'consequence',p:'/ˈkɑːn.sə.kwენს/ · noun',m:'結果；後果',e:'One <b>consequence</b> of the storm was a power outage.',t:'暴風雨造成的其中一個後果是停電。'},
+    {w:'create',p:'/kriˈeɪt/ · verb',m:'創造；製作',e:'The class will <b>create</b> a model of the solar system.',t:'全班要製作一個太陽系模型。'},
+    {w:'discover',p:'/dɪˈskʌv.ɚ/ · verb',m:'發現',e:'Scientists <b>discover</b> new things by asking questions.',t:'科學家藉由提問來發現新事物。'},
+    {w:'effect',p:'/ɪˈfekt/ · noun',m:'影響；效果',e:'The medicine had a helpful <b>effect</b>.',t:'這種藥產生了有幫助的效果。'},
+    {w:'estimate',p:'/ˈes.tə.meɪt/ · verb / noun',m:'估計；估算',e:'Can you <b>estimate</b> how many books are on the shelf?',t:'你能估算書架上有幾本書嗎？'},
+    {w:'expand',p:'/ɪkˈspænd/ · verb',m:'擴大；增加',e:'The balloon will <b>expand</b> when we add air.',t:'加入空氣後，氣球會膨脹。'},
+    {w:'factor',p:'/ˈfæk.tɚ/ · noun',m:'因素',e:'Weather is one <b>factor</b> that can affect a game.',t:'天氣是可能影響比賽的一個因素。'},
+    {w:'identify',p:'/aɪˈden.tə.faɪ/ · verb',m:'辨認；確認',e:'Look for clues to <b>identify</b> the animal.',t:'找線索來辨認這種動物。'},
+    {w:'include',p:'/ɪnˈkluːd/ · verb',m:'包括；包含',e:'The art kit will <b>include</b> paper and colored pencils.',t:'美術材料包會包含紙和色鉛筆。'},
+    {w:'observe',p:'/əbˈzɝːv/ · verb',m:'觀察；注意到',e:'We will <b>observe</b> how the moon changes shape.',t:'我們要觀察月亮形狀如何改變。'},
+    {w:'predict',p:'/prɪˈdɪkt/ · verb',m:'預測',e:'Use the clues to <b>predict</b> what happens next.',t:'利用線索預測接下來會發生什麼。'},
+    {w:'process',p:'/ˈprɑː.ses/ · noun',m:'過程；程序',e:'Growing a plant is a slow <b>process</b>.',t:'植物生長是一個緩慢的過程。'},
+    {w:'require',p:'/rɪˈkwaɪɚ/ · verb',m:'需要；要求',e:'This recipe will <b>require</b> two eggs.',t:'這份食譜需要兩顆蛋。'},
+    {w:'resource',p:'/ˈriː.sɔːrs/ · noun',m:'資源；資料來源',e:'The library is a useful <b>resource</b> for research.',t:'圖書館是做研究的實用資源。'},
+    {w:'respond',p:'/rɪˈspɑːnd/ · verb',m:'回答；回應',e:'Please <b>respond</b> to the question in a full sentence.',t:'請用完整句子回答問題。'},
+    {w:'structure',p:'/ˈstrʌk.tʃɚ/ · noun',m:'結構；構造',e:'The <b>structure</b> of a story includes a beginning and an ending.',t:'故事的結構包含開頭和結尾。'},
+    {w:'survive',p:'/sɚˈvaɪv/ · verb',m:'生存；存活',e:'Some plants can <b>survive</b> with very little water.',t:'有些植物只需要很少的水就能存活。'}
+  ];
+  function replaceWordSet(){
+    const current=new Set(words.map(x=>x.w));
+    const available=freshWords.filter(x=>!current.has(x.w));
+    if(available.length<10){toast('新單字組已用完，請重新整理網頁再開始。');return}
+    const nextSet=available.sort(()=>Math.random()-.5).slice(0,10);
+    words.splice(0,words.length,...nextSet);
+    index=0;
+    if(typeof quizQuestionOrder!=='undefined'){quizQuestionOrder=[];quizQuestionPosition=0;score=0}
+    window.currentAnswerCorrect=null;
+    window.nextCard=function(){index=(index+1)%words.length;window.cards()};
+    window.cards();
+    toast('已換成 10 個新單字！');
+  }
+  function installButton(){
+    const old=document.querySelector('#refreshDeckButton');
+    if(!old)return;
+    const button=old.cloneNode(true);
+    button.textContent='🔄 換一組 10 個新單字';
+    button.setAttribute('aria-label','換成另一組十個新單字');
+    old.replaceWith(button);
+    button.addEventListener('click',replaceWordSet);
+  }
+  installButton();
+})();
 </script></body></html>
 
 
