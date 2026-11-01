@@ -524,6 +524,25 @@ window.nextQuestion=function(){
   };
   window.cards();
 })();
+</script><script>
+(function(){
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    const actions=document.querySelector('#cardsView .actions');
+    if(!actions)return;
+    actions.querySelectorAll('#speedButton,#genderButton,#voicePicker').forEach(x=>x.remove());
+    let speakButton=actions.querySelector('#speakButton');
+    if(!speakButton){
+      speakButton=document.createElement('button');
+      speakButton.id='speakButton';speakButton.className='btn soft';
+      speakButton.textContent='🔊 聽發音';
+      speakButton.addEventListener('click',()=>window.speak());
+      actions.insertBefore(speakButton,actions.firstChild);
+    }
+  };
+  window.cards();
+})();
 </script></body></html>
 
 
