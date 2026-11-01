@@ -247,6 +247,52 @@ window.nextQuestion=function(){
   window.cards=function(){renderCards();installButton()};
   installButton();
 })();
+</script><script>
+(function(){
+  const now=new Date();
+  const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+  const dailyKey='wq-daily-v1-'+today;
+  let dailyLearned=new Set(JSON.parse(localStorage.getItem(dailyKey)||'[]'));
+  window.updateGoal=function(){
+    const amount=Math.min(dailyLearned.size,10);
+    const text=document.querySelector('#goalText'),fill=document.querySelector('#fill');
+    if(text)text.textContent=amount+' / 10';
+    if(fill)fill.style.width=(amount*10)+'%';
+  };
+  function saveDaily(){localStorage.setItem(dailyKey,JSON.stringify([...dailyLearned]));window.updateGoal()}
+  const previousAnswer=window.answer;
+  window.answer=function(el,correct){
+    previousAnswer(el,correct);
+    if(window.currentAnswerCorrect){dailyLearned.add(correct);saveDaily()}
+  };
+  window.markKnown=function(){
+    const word=words[index].w;
+    learned.add(word);dailyLearned.add(word);save();saveDaily();
+    toast('太棒了！已加入今日學習 ✨');
+  };
+  const header=document.querySelector('.top');
+  const tag=document.querySelector('.top .tag');
+  if(header&&tag&&!document.querySelector('#topActions')){
+    const actions=document.createElement('div');
+    actions.id='topActions';
+    actions.style.cssText='display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end';
+    const button=document.createElement('button');
+    button.id='resetTodayButton';button.className='btn soft';button.textContent='📅 更新日期';
+    button.setAttribute('aria-label','重置今日學習進度並刷新題組');
+    button.style.cssText='padding:9px 12px;font-size:13px;white-space:nowrap';
+    button.addEventListener('click',()=>{
+      dailyLearned.clear();localStorage.removeItem(dailyKey);window.updateGoal();
+      document.querySelector('#refreshDeckButton')?.click();
+      toast('今日學習已重置，並已刷新 10 個單字！');
+    });
+    tag.parentNode.insertBefore(actions,tag);
+    actions.append(button,tag);
+    const style=document.createElement('style');
+    style.textContent='@media(max-width:700px){#topActions{gap:5px}#resetTodayButton{font-size:11px!important;padding:7px 9px!important}}';
+    document.head.appendChild(style);
+  }
+  window.updateGoal();
+})();
 </script></body></html>
 
 
