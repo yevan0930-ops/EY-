@@ -293,6 +293,51 @@ window.nextQuestion=function(){
   }
   window.updateGoal();
 })();
+</script><script>
+(function(){
+  const archive=[
+    {w:'analyze',m:'分析；仔細研究',pos:'verb'},
+    {w:'approach',m:'接近；方法',pos:'verb / noun'},
+    {w:'communicate',m:'溝通；傳達',pos:'verb'},
+    {w:'contrast',m:'對比；差異',pos:'verb / noun'},
+    {w:'evidence',m:'證據；根據',pos:'noun'},
+    {w:'function',m:'功能；運作',pos:'noun / verb'},
+    {w:'indicate',m:'指出；顯示',pos:'verb'},
+    {w:'perspective',m:'觀點；看法',pos:'noun'},
+    {w:'region',m:'地區；區域',pos:'noun'},
+    {w:'significant',m:'重要的；有重大意義的',pos:'adjective'},
+    {w:'adapt',m:'適應；調整',pos:'verb'},
+    {w:'benefit',m:'好處；使受益',pos:'noun / verb'},
+    {w:'conclude',m:'推論；結束',pos:'verb'},
+    {w:'consequence',m:'結果；後果',pos:'noun'},
+    {w:'create',m:'創造；製作',pos:'verb'},
+    {w:'discover',m:'發現',pos:'verb'},
+    {w:'effect',m:'影響；效果',pos:'noun'},
+    {w:'estimate',m:'估計；估算',pos:'verb / noun'},
+    {w:'expand',m:'擴大；增加',pos:'verb'},
+    {w:'factor',m:'因素',pos:'noun'},
+    {w:'identify',m:'辨認；確認',pos:'verb'},
+    {w:'include',m:'包括；包含',pos:'verb'},
+    {w:'observe',m:'觀察；注意到',pos:'verb'},
+    {w:'predict',m:'預測',pos:'verb'},
+    {w:'process',m:'過程；程序',pos:'noun'},
+    {w:'require',m:'需要；要求',pos:'verb'},
+    {w:'resource',m:'資源；資料來源',pos:'noun'},
+    {w:'respond',m:'回答；回應',pos:'verb'},
+    {w:'structure',m:'結構；構造',pos:'noun'},
+    {w:'survive',m:'生存；存活',pos:'verb'}
+  ];
+  const archived=new Map(archive.map(x=>[x.w,x]));
+  window.wordList=function(){
+    const entries=new Map();
+    words.forEach(x=>entries.set(x.w,{w:x.w,m:x.m,pos:x.p.split('·')[1]?.trim()||''}));
+    learned.forEach(name=>{if(!entries.has(name))entries.set(name,archived.get(name)||{w:name,m:'已學會的單字',pos:''})});
+    const list=[...entries.values()].sort((a,b)=>a.w.localeCompare(b.w));
+    $('#wordsView').innerHTML='<div class="section-head"><h2>單字表</h2><span class="count">已學會 '+learned.size+' 個 · 共 '+list.length+' 個</span></div><div class="list">'+
+      (list.length?list.map(x=>'<div class="row"><div><strong>'+x.w+'</strong><small>'+x.m+(x.pos?' · '+x.pos:'')+'</small></div><span class="badge '+(learned.has(x.w)?'done':'')+'">'+(learned.has(x.w)?'✓ 學會了':'待學習')+'</span></div>').join(''):'<div class="empty">還沒有學會的單字，先從單字卡開始吧！</div>')+
+      '</div>';
+  };
+})();
 </script></body></html>
 
 
