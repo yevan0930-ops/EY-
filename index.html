@@ -311,6 +311,12 @@ window.nextQuestion=function(){
     learned.add(word);dailyLearned.add(word);save();saveDaily();
     toast('太棒了！已加入今日學習 ✨');
   };
+  window.clearLearnedWords=function(){
+    learned.clear();localStorage.removeItem('wq-learned');
+    window.updateGoal();
+    if(typeof window.wordList==='function')window.wordList();
+    toast('已清除已學會單字。');
+  };
   const header=document.querySelector('.top');
   const tag=document.querySelector('.top .tag');
   if(header&&tag&&!document.querySelector('#topActions')){
@@ -437,6 +443,25 @@ window.nextQuestion=function(){
     ['cardsView','quizView','wordsView','weeklyExamView'].forEach(id=>document.getElementById(id).classList.toggle('hidden',id!=='weeklyExamView'));
     showHome();
   });
+})();
+</script><script>
+(function(){
+  const renderWordList=window.wordList;
+  window.wordList=function(){
+    renderWordList();
+    const head=document.querySelector('#wordsView .section-head');
+    if(!head||head.querySelector('#clearLearnedButton'))return;
+    const button=document.createElement('button');
+    button.id='clearLearnedButton';button.className='btn soft';
+    button.textContent='🧹 重置已學會單字';
+    button.style.cssText='padding:8px 11px;font-size:12px;white-space:nowrap';
+    button.addEventListener('click',()=>{
+      if(confirm('確定清除這個網站記錄的已學會單字嗎？此操作不會清除語音設定。')){
+        window.clearLearnedWords();
+      }
+    });
+    head.appendChild(button);
+  };
 })();
 </script></body></html>
 
