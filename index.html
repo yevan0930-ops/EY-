@@ -145,7 +145,6 @@ window.answer=function(el,correct){
   const nextButton=document.querySelector('#quizView .quiz-actions button');
   if(yes){
     score++;$('#feedback').textContent='答對了！做得好 🎉';
-    learned.add(correct);save();
     if(nextButton)nextButton.textContent='下一題 →';
   }else{
     el.classList.add('wrong');
@@ -302,10 +301,8 @@ window.nextQuestion=function(){
   };
   function saveDaily(){localStorage.setItem(dailyKey,JSON.stringify([...dailyLearned]));window.updateGoal()}
   const previousAnswer=window.answer;
-  window.answer=function(el,correct){
-    previousAnswer(el,correct);
-    if(window.currentAnswerCorrect){dailyLearned.add(correct);saveDaily()}
-  };
+  window.answer=function(el,correct){previousAnswer(el,correct)};
+  window.recordDailyLearned=function(names){names.forEach(name=>dailyLearned.add(name));saveDaily()};
   window.markKnown=function(){
     const word=words[index].w;
     learned.add(word);dailyLearned.add(word);save();saveDaily();
@@ -461,6 +458,39 @@ window.nextQuestion=function(){
       }
     });
     head.appendChild(button);
+  };
+})();
+</script><script>
+(function(){
+  window.markKnown=function(){toast('小測驗整輪全對後，單字才會加入已學會清單。')};
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    document.querySelector('#cardsView .actions .known')?.remove();
+    if(!document.querySelector('#cardsView .quizLearnHint')){
+      const hint=document.createElement('div');hint.className='tiny quizLearnHint';
+      hint.style.cssText='text-align:center;margin-top:10px';
+      hint.textContent='小測驗整輪全對後，10 個單字才會加入已學會清單。';
+      document.querySelector('#cardsView .actions')?.after(hint);
+    }
+  };
+  const oldStart=window.startQuizRound;
+  window.startQuizRound=function(){oldStart();window.currentAnswerCorrect=null};
+  const renderQuestion=window.quiz;
+  window.quiz=function(){
+    if(!quizQuestionOrder.length)window.startQuizRound();
+    if(quizQuestionPosition>=quizQuestionOrder.length){
+      const passed=score===words.length;
+      const roundWords=quizQuestionOrder.map(i=>words[i].w);
+      if(passed){
+        roundWords.forEach(name=>learned.add(name));
+        save();
+        window.recordDailyLearned(roundWords);
+      }
+      $('#quizView').innerHTML='<div class="section-head"><h2>'+(passed?'全對了！':'本輪完成')+'</h2><span class="count">得分 '+score+' / '+words.length+'</span></div><div class="empty"><div style="font-size:48px">'+(passed?'🏆':'📘')+'</div><h3>'+(passed?'太棒了！':'這輪還沒有全對')+'</h3><p>'+(passed?'這 10 個單字已加入已學會清單。':'需要整輪答對，才會加入已學會清單。你可以再試一次。')+'</p><button class="btn primary" onclick="restartQuizRound()">重新測驗 →</button></div>';
+      return;
+    }
+    renderQuestion();
   };
 })();
 </script></body></html>
