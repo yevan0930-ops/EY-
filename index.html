@@ -571,6 +571,28 @@ window.nextQuestion=function(){
   };
   window.cards();
 })();
+</script><script>
+(function(){
+  window.previousCard=function(){index=(index-1+words.length)%words.length;window.cards()};
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    const actions=document.querySelector('#cardsView .actions');
+    if(!actions)return;
+    const buttons=actions.querySelectorAll('#previousCardButton');
+    buttons.forEach((button,i)=>{if(i>0)button.remove()});
+    let button=actions.querySelector('#previousCardButton');
+    if(!button){
+      button=document.createElement('button');
+      button.id='previousCardButton';button.className='btn soft';
+      button.textContent='← 上一個單字';
+      button.setAttribute('aria-label','返回上一個單字');
+    }
+    button.onclick=window.previousCard;
+    actions.insertBefore(button,actions.querySelector('.primary'));
+  };
+  window.cards();
+})();
 </script></body></html>
 
 
