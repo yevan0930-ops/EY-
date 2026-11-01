@@ -510,6 +510,20 @@ window.nextQuestion=function(){
   };
   window.cards();
 })();
+</script><script>
+(function(){
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    const actions=document.querySelector('#cardsView .actions');
+    if(!actions)return;
+    actions.querySelectorAll('button').forEach(button=>{
+      if(button.textContent.includes('聽發音')||button.id==='speedButton'||button.id==='genderButton'||button.id==='voicePicker')button.remove();
+    });
+    actions.querySelector('#voicePicker')?.remove();
+  };
+  window.cards();
+})();
 </script></body></html>
 
 
