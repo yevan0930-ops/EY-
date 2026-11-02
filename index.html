@@ -593,6 +593,67 @@ window.nextQuestion=function(){
   };
   window.cards();
 })();
+</script><script>
+(function(){
+  const nav=document.querySelector('.nav');
+  const main=document.querySelector('.main');
+  const mixedNav=document.createElement('button');
+  mixedNav.dataset.view='mixedTest';
+  mixedNav.innerHTML='<span class="icon">🎲</span>混合測驗';
+  nav.appendChild(mixedNav);
+  const panel=document.createElement('section');
+  panel.id='mixedTestView';panel.className='panel hidden';
+  main.appendChild(panel);
+  let pool=[],questions=[],position=0,score=0,answered=false;
+  const total=10;
+  function shuffle(items){return [...items].sort(()=>Math.random()-.5)}
+  function getLearned(){
+    const archive=window.vocabularyArchive||new Map();
+    return [...learned].map(name=>words.find(x=>x.w===name)||archive.get(name)||{w:name,m:'已學會的單字'})
+      .filter((x,i,a)=>a.findIndex(y=>y.w===x.w)===i);
+  }
+  function showHome(){
+    pool=getLearned();
+    const count=pool.length;
+    panel.innerHTML='<div class="section-head"><h2>混合測驗</h2><span class="count">隨機 10 題</span></div><div class="quizbox"><p>從已學會的單字中隨機抽 10 個，測驗看看記得多少。</p><div class="feedback">目前已學會 '+count+' / 10 個單字'+(count<10?'，還差 '+(10-count)+' 個才能開始。':'，可以開始測驗了！')+'</div><button class="btn primary" id="startMixedTest" '+(count<10?'disabled':'')+'>'+(count<10?'再學 '+(10-count)+' 個即可開始':'開始混合測驗 →')+'</button></div>';
+    if(count>=10)panel.querySelector('#startMixedTest').addEventListener('click',start);
+  }
+  function start(){
+    pool=getLearned();questions=shuffle(pool).slice(0,total);position=0;score=0;renderQuestion();
+  }
+  function renderQuestion(){
+    if(position>=total){renderResults();return}
+    const q=questions[position];
+    const options=shuffle([q,...shuffle(pool.filter(x=>x.w!==q.w&&x.m!==q.m)).slice(0,3)]);
+    answered=false;
+    panel.innerHTML='<div class="section-head"><h2>混合測驗</h2><span class="count">得分 '+score+'</span></div><div class="quizbox"><div class="question-label">選出最接近的中文意思</div><div class="qword">'+q.w+'</div><div class="answers">'+options.map(x=>'<button class="answer" data-word="'+x.w+'" onclick="answerMixedTest(this)">'+x.m+'</button>').join('')+'</div><div class="feedback" id="mixedFeedback">第 '+(position+1)+' / '+total+' 題</div><div class="quiz-actions"><span class="tiny">複習已學會的單字</span><button class="btn primary" id="mixedNext" onclick="nextMixedTestQuestion()">下一題 →</button></div></div>';
+  }
+  window.answerMixedTest=function(button){
+    if(answered)return;answered=true;
+    const q=questions[position],correct=button.dataset.word===q.w;
+    document.querySelectorAll('#mixedTestView .answer').forEach(x=>{if(x.dataset.word===q.w)x.classList.add('correct')});
+    if(correct){score++;panel.querySelector('#mixedFeedback').textContent='答對了！';}
+    else{button.classList.add('wrong');panel.querySelector('#mixedFeedback').textContent='正確答案是「'+q.m+'」';}
+    panel.querySelector('.count').textContent='得分 '+score;
+    panel.querySelector('#mixedNext').textContent=position===total-1?'看成績 →':'下一題 →';
+  };
+  window.nextMixedTestQuestion=function(){position++;renderQuestion()};
+  function renderResults(){
+    panel.innerHTML='<div class="section-head"><h2>混合測驗完成！</h2><span class="count">'+score+' / '+total+' 分</span></div><div class="empty"><div style="font-size:48px">🎉</div><h3>這次答對 '+score+' 題</h3><p>再測一次可以重新抽 10 個單字。</p><button class="btn primary" id="retryMixedTest">重新抽題 →</button></div>';
+    panel.querySelector('#retryMixedTest').addEventListener('click',start);
+  }
+  mixedNav.addEventListener('click',()=>{
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+    mixedNav.classList.add('active');
+    ['cardsView','quizView','wordsView','weeklyExamView','mixedTestView'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',id!=='mixedTestView'));
+    showHome();
+  });
+  nav.querySelectorAll('button:not([data-view="mixedTest"]):not([data-view="weeklyExam"])').forEach(button=>button.addEventListener('click',()=>{
+    document.querySelector('#weeklyExamView')?.classList.add('hidden');
+    panel.classList.add('hidden');
+  }));
+  nav.querySelector('[data-view="weeklyExam"]')?.addEventListener('click',()=>panel.classList.add('hidden'));
+})();
 </script></body></html>
 
 
