@@ -263,8 +263,8 @@ window.nextQuestion=function(){
   window.freshWordsArchive=freshWords;
   function replaceWordSet(){
     const current=new Set(words.map(x=>x.w));
-    const available=freshWords.filter(x=>!current.has(x.w));
-    if(available.length<10){toast('新單字組已用完，請重新整理網頁再開始。');return}
+    const available=freshWords.filter(x=>!current.has(x.w)&&!learned.has(x.w));
+    if(available.length<10){toast('目前剩下 '+available.length+' 個未學會的新單字，還不足 10 個題目。');return}
     const nextSet=available.sort(()=>Math.random()-.5).slice(0,10);
     words.splice(0,words.length,...nextSet);
     index=0;
