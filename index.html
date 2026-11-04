@@ -654,6 +654,49 @@ window.nextQuestion=function(){
   }));
   nav.querySelector('[data-view="weeklyExam"]')?.addEventListener('click',()=>panel.classList.add('hidden'));
 })();
+</script><script>
+(function(){
+  const now=new Date();
+  const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+  const bonusKey='wq-daily-manual-'+today;
+  let bonus=Math.max(0,Number(localStorage.getItem(bonusKey)||0));
+  const originalUpdateGoal=window.updateGoal;
+  window.updateGoal=function(){
+    originalUpdateGoal();
+    const text=document.querySelector('#goalText'),fill=document.querySelector('#fill');
+    if(!text||!fill)return;
+    const learnedToday=Number(text.textContent.split('/')[0].trim())||0;
+    const count=Math.min(10,learnedToday+bonus);
+    text.textContent=count+' / 10';
+    fill.style.width=(count*10)+'%';
+  };
+  const resetDate=document.querySelector('#resetTodayButton');
+  resetDate?.addEventListener('click',()=>{
+    bonus=0;localStorage.removeItem(bonusKey);window.updateGoal();
+  });
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    const actions=document.querySelector('#cardsView .actions');
+    if(!actions||actions.querySelector('#studyPlusOne'))return;
+    const button=document.createElement('button');
+    button.id='studyPlusOne';button.className='btn known';
+    button.textContent='單字學習 +1';
+    button.setAttribute('aria-label','今日單字學習計數加一');
+    button.addEventListener('click',()=>{
+      window.updateGoal();
+      const count=Number(document.querySelector('#goalText')?.textContent.split('/')[0].trim())||0;
+      if(count>=10){toast('今日學習目標已達成！');return}
+      bonus=Math.min(10,bonus+1);
+      localStorage.setItem(bonusKey,String(bonus));
+      window.updateGoal();
+      toast('今日學習 +1！');
+    });
+    actions.insertBefore(button,actions.querySelector('.primary'));
+  };
+  window.updateGoal();
+  window.cards();
+})();
 </script></body></html>
 
 
