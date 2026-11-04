@@ -704,10 +704,11 @@ window.nextQuestion=function(){
   const dailyKey='wq-daily-v1-'+today;
   const oldBonusKey='wq-daily-manual-'+today;
   const goalKey='wq-daily-goal-'+today;
-  localStorage.removeItem(oldBonusKey);
+  const storedCount=Number(localStorage.getItem(oldBonusKey)||0);
+  let manualCount=Number.isFinite(storedCount)?Math.max(0,storedCount):0;
   let dailyGoal=Math.max(10,Number(localStorage.getItem(goalKey)||10));
   window.updateGoal=function(){
-    const learnedToday=new Set(JSON.parse(localStorage.getItem(dailyKey)||'[]')).size;
+    const learnedToday=new Set(JSON.parse(localStorage.getItem(dailyKey)||'[]')).size+manualCount;
     const text=document.querySelector('#goalText'),fill=document.querySelector('#fill');
     if(text)text.textContent=learnedToday+' / '+dailyGoal;
     if(fill)fill.style.width=Math.min(100,learnedToday/dailyGoal*100)+'%';
@@ -715,7 +716,7 @@ window.nextQuestion=function(){
     if(hint)hint.textContent='今日目標：'+dailyGoal+' 個單字';
   };
   document.querySelector('#resetTodayButton')?.addEventListener('click',()=>{
-    dailyGoal=10;localStorage.removeItem(goalKey);window.updateGoal();
+    dailyGoal=10;manualCount=0;localStorage.removeItem(goalKey);localStorage.removeItem(oldBonusKey);window.updateGoal();
   });
   const renderCards=window.cards;
   window.cards=function(){
@@ -728,10 +729,11 @@ window.nextQuestion=function(){
     button.textContent='單字學習 +1';
     button.onclick=null;
     button.addEventListener('click',()=>{
-      dailyGoal++;
+      dailyGoal++;manualCount++;
       localStorage.setItem(goalKey,String(dailyGoal));
+      localStorage.setItem(oldBonusKey,String(manualCount));
       window.updateGoal();
-      toast('今日目標增加到 '+dailyGoal+' 個單字！');
+      toast('今日目標和學習數都增加到 '+dailyGoal+'！');
     });
   };
   window.updateGoal();
