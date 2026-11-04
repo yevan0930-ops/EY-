@@ -697,6 +697,46 @@ window.nextQuestion=function(){
   window.updateGoal();
   window.cards();
 })();
+</script><script>
+(function(){
+  const now=new Date();
+  const today=[now.getFullYear(),String(now.getMonth()+1).padStart(2,'0'),String(now.getDate()).padStart(2,'0')].join('-');
+  const dailyKey='wq-daily-v1-'+today;
+  const oldBonusKey='wq-daily-manual-'+today;
+  const goalKey='wq-daily-goal-'+today;
+  localStorage.removeItem(oldBonusKey);
+  let dailyGoal=Math.max(10,Number(localStorage.getItem(goalKey)||10));
+  window.updateGoal=function(){
+    const learnedToday=new Set(JSON.parse(localStorage.getItem(dailyKey)||'[]')).size;
+    const text=document.querySelector('#goalText'),fill=document.querySelector('#fill');
+    if(text)text.textContent=learnedToday+' / '+dailyGoal;
+    if(fill)fill.style.width=Math.min(100,learnedToday/dailyGoal*100)+'%';
+    const hint=document.querySelector('.goal .tiny');
+    if(hint)hint.textContent='今日目標：'+dailyGoal+' 個單字';
+  };
+  document.querySelector('#resetTodayButton')?.addEventListener('click',()=>{
+    dailyGoal=10;localStorage.removeItem(goalKey);window.updateGoal();
+  });
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    const actions=document.querySelector('#cardsView .actions');
+    const oldButton=actions?.querySelector('#studyPlusOne');
+    if(!oldButton)return;
+    const button=oldButton.cloneNode(true);
+    oldButton.replaceWith(button);
+    button.textContent='單字學習 +1';
+    button.onclick=null;
+    button.addEventListener('click',()=>{
+      dailyGoal++;
+      localStorage.setItem(goalKey,String(dailyGoal));
+      window.updateGoal();
+      toast('今日目標增加到 '+dailyGoal+' 個單字！');
+    });
+  };
+  window.updateGoal();
+  window.cards();
+})();
 </script></body></html>
 
 
