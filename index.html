@@ -760,19 +760,21 @@ window.nextQuestion=function(){
     if(!answered&&quizQuestionOrder[quizQuestionPosition]!==undefined)record(words[quizQuestionOrder[quizQuestionPosition]].w,false);
     return oldNext();
   };
+  function isUnanswered(panelId){
+    const feedback=document.querySelector('#'+panelId+' .feedback');
+    return !!feedback&&feedback.textContent.trim().startsWith('第 ')&&feedback.textContent.includes(' 題');
+  }
   function wrapExamAnswer(fn,panelId){
     return function(button){
-      const feedback=document.querySelector('#'+panelId+' .feedback');
       const word=document.querySelector('#'+panelId+' .qword')?.textContent;
-      if(feedback&&/^第 \\d+ \/ \\d+ 題$/.test(feedback.textContent))record(word,button.dataset.word===word);
+      if(isUnanswered(panelId))record(word,button.dataset.word===word);
       return fn(button);
     };
   }
   function wrapExamNext(fn,panelId){
     return function(){
-      const feedback=document.querySelector('#'+panelId+' .feedback');
       const word=document.querySelector('#'+panelId+' .qword')?.textContent;
-      if(feedback&&/^第 \\d+ \/ \\d+ 題$/.test(feedback.textContent))record(word,false);
+      if(isUnanswered(panelId))record(word,false);
       return fn();
     };
   }
