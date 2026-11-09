@@ -739,6 +739,77 @@ window.nextQuestion=function(){
   window.updateGoal();
   window.cards();
 })();
+</script><script>
+(function(){
+  let stats={};
+  try{stats=JSON.parse(localStorage.getItem('wq-error-stats')||'{}')||{}}catch(_){stats={}}
+  function record(word,correct){
+    if(!word)return;
+    const row=stats[word]||(stats[word]={attempts:0,wrong:0});
+    row.attempts++;if(!correct)row.wrong++;
+    localStorage.setItem('wq-error-stats',JSON.stringify(stats));
+  }
+  window.recordVocabularyAttempt=record;
+  const oldAnswer=window.answer;
+  window.answer=function(button,correctWord){
+    if(!answered)record(correctWord,button.dataset.word===correctWord);
+    return oldAnswer(button,correctWord);
+  };
+  const oldNext=window.nextQuestion;
+  window.nextQuestion=function(){
+    if(!answered&&quizQuestionOrder[quizQuestionPosition]!==undefined)record(words[quizQuestionOrder[quizQuestionPosition]].w,false);
+    return oldNext();
+  };
+  function wrapExamAnswer(fn,panelId){
+    return function(button){
+      const feedback=document.querySelector('#'+panelId+' .feedback');
+      const word=document.querySelector('#'+panelId+' .qword')?.textContent;
+      if(feedback&&/^第 \\d+ \/ \\d+ 題$/.test(feedback.textContent))record(word,button.dataset.word===word);
+      return fn(button);
+    };
+  }
+  function wrapExamNext(fn,panelId){
+    return function(){
+      const feedback=document.querySelector('#'+panelId+' .feedback');
+      const word=document.querySelector('#'+panelId+' .qword')?.textContent;
+      if(feedback&&/^第 \\d+ \/ \\d+ 題$/.test(feedback.textContent))record(word,false);
+      return fn();
+    };
+  }
+  window.answerWeeklyExam=wrapExamAnswer(window.answerWeeklyExam,'weeklyExamView');
+  window.nextWeeklyExamQuestion=wrapExamNext(window.nextWeeklyExamQuestion,'weeklyExamView');
+  window.answerMixedTest=wrapExamAnswer(window.answerMixedTest,'mixedTestView');
+  window.nextMixedTestQuestion=wrapExamNext(window.nextMixedTestQuestion,'mixedTestView');
+  const nav=document.querySelector('.nav');
+  const main=document.querySelector('.main');
+  const rankNav=document.createElement('button');
+  rankNav.dataset.view='errorRate';
+  rankNav.innerHTML='<span class="icon">📊</span>錯誤率排名';
+  nav.appendChild(rankNav);
+  const panel=document.createElement('section');
+  panel.id='errorRateView';panel.className='panel hidden';
+  main.appendChild(panel);
+  function showRanking(){
+    const archive=window.vocabularyArchive||new Map();
+    const rows=Object.entries(stats).filter(([,x])=>x.attempts>0).map(([word,x])=>{
+      const info=words.find(y=>y.w===word)||archive.get(word)||{m:'單字'};
+      return {word,meaning:info.m,attempts:x.attempts,wrong:x.wrong,rate:x.wrong/x.attempts};
+    }).sort((a,b)=>b.rate-a.rate||b.wrong-a.wrong||a.word.localeCompare(b.word));
+    let lastRate=null,rank=0;
+    const list=rows.map((x,i)=>{
+      if(x.rate!==lastRate)rank=i+1;lastRate=x.rate;
+      return '<div class="row"><div><strong>#'+rank+'　'+x.word+'</strong><small>'+x.meaning+' · 答錯 '+x.wrong+' / 作答 '+x.attempts+' 次</small></div><span class="badge '+(x.rate>=.5?'':'done')+'">'+Math.round(x.rate*100)+'%</span></div>';
+    }).join('');
+    panel.innerHTML='<div class="section-head"><h2>錯誤率排名</h2><span class="count">共 '+rows.length+' 個單字</span></div><p class="tiny">依答錯比例由高到低排列，跳過的題目也算一次答錯。</p><div class="list">'+(list||'<div class="empty">目前還沒有測驗紀錄，完成小測驗後就會出現在這裡。</div>')+'</div>';
+  }
+  rankNav.addEventListener('click',()=>{
+    document.querySelectorAll('.nav button').forEach(x=>x.classList.remove('active'));
+    rankNav.classList.add('active');
+    ['cardsView','quizView','wordsView','weeklyExamView','mixedTestView','errorRateView'].forEach(id=>document.getElementById(id)?.classList.toggle('hidden',id!=='errorRateView'));
+    showRanking();
+  });
+  nav.querySelectorAll('button:not([data-view="errorRate"])').forEach(button=>button.addEventListener('click',()=>panel.classList.add('hidden')));
+})();
 </script></body></html>
 
 
