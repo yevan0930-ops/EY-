@@ -619,7 +619,16 @@ window.nextQuestion=function(){
     if(count>=10)panel.querySelector('#startMixedTest').addEventListener('click',start);
   }
   function start(){
-    pool=getLearned();questions=shuffle(pool).slice(0,total);position=0;score=0;renderQuestion();
+    pool=getLearned();
+    let stats={};try{stats=JSON.parse(localStorage.getItem('wq-error-stats')||'{}')||{}}catch(_){stats={}}
+    const byError=[...pool].sort((a,b)=>{
+      const sa=stats[a.w]||{attempts:0,wrong:0},sb=stats[b.w]||{attempts:0,wrong:0};
+      const ra=sa.attempts?sa.wrong/sa.attempts:-1,rb=sb.attempts?sb.wrong/sb.attempts:-1;
+      return rb-ra||sb.wrong-sa.wrong||a.w.localeCompare(b.w);
+    });
+    questions=byError.slice(0,total);
+    if(questions.length<total)questions=questions.concat(shuffle(pool.filter(x=>!questions.some(q=>q.w===x.w))).slice(0,total-questions.length));
+    position=0;score=0;renderQuestion();
   }
   function renderQuestion(){
     if(position>=total){renderResults();return}
