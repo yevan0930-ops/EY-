@@ -918,6 +918,66 @@ window.nextQuestion=function(){
     if(refreshed)toast('今日學習已重置，並已換成 10 個未學會的新單字！');
   });
 })();
+</script><script>
+(function(){
+  const renderCards=window.cards;
+  window.cards=function(){
+    renderCards();
+    document.querySelectorAll('#cardsView #studyPlusOne').forEach(button=>button.remove());
+  };
+  window.cards();
+
+  const escapeHtml=value=>String(value??'').replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+  window.wordList=function(){
+    const entries=new Map();
+    const fullData=new Map((window.freshWordsArchive||[]).map(item=>[item.w,item]));
+    words.forEach(item=>entries.set(item.w,{...item}));
+    learned.forEach(name=>{
+      if(entries.has(name))return;
+      entries.set(name,fullData.get(name)||window.vocabularyArchive?.get(name)||{w:name,m:'已學會的單字'});
+    });
+    const list=[...entries.values()].sort((a,b)=>a.w.localeCompare(b.w));
+    const rows=list.map(item=>{
+      const pos=item.pos||(item.p?.split('·')[1]||'').trim()||'詞性資料未提供';
+      const example=(item.e||('I can use '+item.w+' in a sentence.')).replace(/<[^>]*>/g,'');
+      const translation=item.t||('我可以在句子中使用「'+item.w+'」。');
+      const row=document.createElement('div');row.className='row';
+      const details=document.createElement('div');
+      const title=document.createElement('div');
+      const word=document.createElement('strong');word.textContent=item.w;title.append(word);
+      const speak=document.createElement('button');
+      speak.type='button';speak.className='btn soft';speak.textContent='🔊 聽發音';
+      speak.style.cssText='margin-left:8px;padding:5px 9px;font-size:12px';
+      speak.setAttribute('aria-label','聆聽 '+item.w+' 的發音');
+      speak.addEventListener('click',()=>{
+        speechSynthesis.cancel();
+        const utterance=new SpeechSynthesisUtterance(item.w);utterance.lang='en-US';
+        utterance.rate=typeof voiceSpeed==='number'?voiceSpeed:.85;
+        const english=speechSynthesis.getVoices().filter(v=>/^en-US/i.test(v.lang));
+        if(typeof voiceGender!=='undefined'){
+          const female=english.find(v=>/google us english|zira|jenny|aria|samantha|ava|victoria|karen|susan/i.test(v.name));
+          const male=english.find(v=>/(?:^|\\W)(?:male|david|guy|mark|eric|christopher|daniel|james|thomas|aaron|ryan|andrew|brian|matthew|oliver|george|jason|tony|kevin|richard|roger|fred)(?:$|\\W)/i.test(v.name));
+          utterance.voice=voiceGender==='female'?(female||english[0]||null):(male||english[0]||null);
+          if(voiceGender==='male')utterance.pitch=.82;
+        }
+        speechSynthesis.speak(utterance);
+      });
+      title.append(speak);details.append(title);
+      const meaning=document.createElement('small');meaning.textContent=(item.m||'')+' · '+pos;details.append(meaning);
+      const en=document.createElement('small');en.textContent='例句：'+example;en.style.cssText='display:block;margin-top:7px;color:#475671';details.append(en);
+      const zh=document.createElement('small');zh.textContent='翻譯：'+translation;zh.style.cssText='display:block;margin-top:3px;color:#66738b';details.append(zh);
+      const badge=document.createElement('span');badge.className='badge '+(learned.has(item.w)?'done':'');badge.textContent=learned.has(item.w)?'✓ 學會了':'待學習';
+      row.append(details,badge);return row;
+    });
+    const view=document.querySelector('#wordsView');
+    view.innerHTML='<div class="section-head"><h2>單字表</h2><span class="count">已學會 '+learned.size+' 個 · 共 '+list.length+' 個</span></div>';
+    const listBox=document.createElement('div');listBox.className='list';
+    if(rows.length)rows.forEach(row=>listBox.append(row));
+    else listBox.innerHTML='<div class="empty">還沒有學會的單字，先從單字卡開始吧！</div>';
+    view.append(listBox);
+  };
+  window.wordList();
+})();
 </script></body></html>
 
 
