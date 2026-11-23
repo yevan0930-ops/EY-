@@ -821,6 +821,40 @@ window.nextQuestion=function(){
   });
   nav.querySelectorAll('button:not([data-view="errorRate"])').forEach(button=>button.addEventListener('click',()=>panel.classList.add('hidden')));
 })();
+</script><script>
+(function(){
+  const renderWordList=window.wordList;
+  window.wordList=function(){
+    renderWordList();
+    document.querySelectorAll('#wordsView .row').forEach(row=>{
+      if(row.querySelector('.wordSpeakButton'))return;
+      const word=row.querySelector('strong')?.textContent?.trim();
+      const info=row.querySelector('div');
+      if(!word||!info)return;
+      const button=document.createElement('button');
+      button.type='button';button.className='btn soft wordSpeakButton';
+      button.textContent='🔊 聽發音';
+      button.setAttribute('aria-label','聆聽 '+word+' 的發音');
+      button.style.cssText='margin-top:8px;padding:6px 10px;font-size:12px';
+      button.addEventListener('click',()=>{
+        speechSynthesis.cancel();
+        const utterance=new SpeechSynthesisUtterance(word);
+        utterance.lang='en-US';
+        utterance.rate=typeof voiceSpeed==='number'?voiceSpeed:.85;
+        if(typeof voiceGender!=='undefined'){
+          const voices=speechSynthesis.getVoices().filter(v=>/^en-US/i.test(v.lang));
+          const female=voices.find(v=>/google us english|zira|jenny|aria|samantha|ava|victoria|karen|susan/i.test(v.name));
+          const male=voices.find(v=>/(?:^|\W)(?:male|david|guy|mark|eric|christopher|daniel|james|thomas|aaron|ryan|andrew|brian|matthew|oliver|george|jason|tony|kevin|richard|roger|fred)(?:$|\W)/i.test(v.name));
+          utterance.voice=voiceGender==='female'?(female||voices[0]||null):(male||voices[0]||null);
+          if(voiceGender==='male')utterance.pitch=.82;
+        }
+        speechSynthesis.speak(utterance);
+      });
+      info.appendChild(button);
+    });
+  };
+  window.wordList();
+})();
 </script></body></html>
 
 
