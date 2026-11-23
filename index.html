@@ -264,7 +264,7 @@ window.nextQuestion=function(){
   function replaceWordSet(){
     const current=new Set(words.map(x=>x.w));
     const available=freshWords.filter(x=>!current.has(x.w)&&!learned.has(x.w));
-    if(available.length<10){toast('目前剩下 '+available.length+' 個未學會的新單字，還不足 10 個題目。');return}
+    if(available.length<10){toast('目前剩下 '+available.length+' 個未學會的新單字，還不足 10 個題目。');return false}
     const nextSet=available.sort(()=>Math.random()-.5).slice(0,10);
     words.splice(0,words.length,...nextSet);
     index=0;
@@ -273,7 +273,9 @@ window.nextQuestion=function(){
     window.nextCard=function(){index=(index+1)%words.length;window.cards()};
     window.cards();
     toast('已換成 10 個新單字！');
+    return true;
   }
+  window.refreshFreshWordSet=replaceWordSet;
   function installButton(){
     const old=document.querySelector('#refreshDeckButton');
     if(!old)return;
@@ -303,6 +305,7 @@ window.nextQuestion=function(){
   const previousAnswer=window.answer;
   window.answer=function(el,correct){previousAnswer(el,correct)};
   window.recordDailyLearned=function(names){names.forEach(name=>dailyLearned.add(name));saveDaily()};
+  window.resetDailyLearned=function(){dailyLearned.clear();localStorage.removeItem(dailyKey)};
   window.markKnown=function(){
     const word=words[index].w;
     learned.add(word);dailyLearned.add(word);save();saveDaily();
@@ -716,6 +719,7 @@ window.nextQuestion=function(){
   const storedCount=Number(localStorage.getItem(oldBonusKey)||0);
   let manualCount=Number.isFinite(storedCount)?Math.max(0,storedCount):0;
   let dailyGoal=Math.max(10,Number(localStorage.getItem(goalKey)||10));
+  window.resetDailyGoal=function(){dailyGoal=10;manualCount=0;localStorage.removeItem(goalKey);localStorage.removeItem(oldBonusKey)};
   window.updateGoal=function(){
     const learnedToday=new Set(JSON.parse(localStorage.getItem(dailyKey)||'[]')).size+manualCount;
     const text=document.querySelector('#goalText'),fill=document.querySelector('#fill');
@@ -854,6 +858,20 @@ window.nextQuestion=function(){
     });
   };
   window.wordList();
+})();
+</script><script>
+(function(){
+  const oldButton=document.querySelector('#resetTodayButton');
+  if(!oldButton)return;
+  const button=oldButton.cloneNode(true);
+  oldButton.replaceWith(button);
+  button.addEventListener('click',()=>{
+    window.resetDailyLearned?.();
+    window.resetDailyGoal?.();
+    const refreshed=window.refreshFreshWordSet?.();
+    window.updateGoal?.();
+    if(refreshed)toast('今日學習已重置，並已換成 10 個未學會的新單字！');
+  });
 })();
 </script></body></html>
 
